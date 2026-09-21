@@ -452,7 +452,7 @@ var toastT;
 function toast(html){var t=$("#toast");t.innerHTML=html;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show")},4500)}
 
 /* ---------- Google Sheet sending ---------- */
-function sheetOn(){return /^https:\/\/script\.google\.com\/macros\/s\/[^\s]+\/exec$/.test(CONFIG.sheetEndpoint="https://script.google.com/macros/s/AKfycbwRC7NGq0fRkqeohvoYNkhxMT-6NyRLVvU2_KcMuAoCMuFXvsJG4l2kVr_iz3rHP_xD/exec")}
+function sheetOn(){return /^https:\/\/script\.google\.com\/macros\/s\/[^\s]+\/exec$/.test(CONFIG.sheetEndpoint="https://script.google.com/macros/s/AKfycbx7NHPz-tqMGqHGI2ZHOwAQHcWdPEE95nG7Fv4y-2Fa2e8fXd_aRgL7qEM4QdSBEDxS/exec")}
 function postSheet(payload){
   payload.key=CONFIG.sheetKey="Roohi";
   var ctl=("AbortController" in window)?new AbortController():null,timer;
