@@ -452,9 +452,9 @@ var toastT;
 function toast(html){var t=$("#toast");t.innerHTML=html;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show")},4500)}
 
 /* ---------- Google Sheet sending ---------- */
-function sheetOn(){return /^https:\/\/script\.google\.com\/macros\/s\/[^\s]+\/exec$/.test(CONFIG.sheetEndpoint||"https://script.google.com/macros/s/AKfycbwRC7NGq0fRkqeohvoYNkhxMT-6NyRLVvU2_KcMuAoCMuFXvsJG4l2kVr_iz3rHP_xD/exec")}
+function sheetOn(){return /^https:\/\/script\.google\.com\/macros\/s\/[^\s]+\/exec$/.test(CONFIG.sheetEndpoint="https://script.google.com/macros/s/AKfycbwRC7NGq0fRkqeohvoYNkhxMT-6NyRLVvU2_KcMuAoCMuFXvsJG4l2kVr_iz3rHP_xD/exec")}
 function postSheet(payload){
-  payload.key=CONFIG.sheetKey||"Roohi";
+  payload.key=CONFIG.sheetKey="Roohi";
   var ctl=("AbortController" in window)?new AbortController():null,timer;
   var req=fetch(CONFIG.sheetEndpoint,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload),keepalive:true,signal:ctl?ctl.signal:undefined}).then(function(){return true});
   var to=new Promise(function(res,rej){timer=setTimeout(function(){if(ctl)ctl.abort();rej(new Error("timeout"))},15000)});
