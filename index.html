@@ -379,13 +379,17 @@ var CONFIG = {
   /* Delivery – free on every order */
   deliveryDays: "7–10 working days",
 
-  /* Payment options shown at checkout */
-  payments: { cod: true, cardOnDelivery: false },
+  /* Payment options shown at checkout. "online" turns on "Pay online" (card / Apple Pay /
+     Google Pay via Ziina). It also needs ZINA_ENABLED + ZINA_API_KEY filled in in Code.gs,
+     and sheetEndpoint + sheetKey below set up, since payments are created through your
+     Google Apps Script (this keeps your secret Ziina API key off the website). */
+  payments: { cod: true, cardOnDelivery: false, online: true },
 
   /* Google Sheet orders: paste your Google Apps Script "Web app URL" here (it ends in /exec).
      Every order and contact-form enquiry is then added to your Google Sheet automatically.
-     sheetKey must match SECRET_KEY in your Apps Script (any word you choose). */
-  sheetEndpoint: "",
+     sheetKey must match SECRET_KEY in your Apps Script (any word you choose).
+     This same endpoint is also used to create and check Ziina online payments. */
+  sheetEndpoint: "https://script.google.com/macros/s/AKfycbwMimSEYRihjqYxOegStWZNYO2DH3W1Jdu8xRgleAN_nnIQvqXvx6LyzvyQtsg_t0uj/exec",
   sheetKey: "",
 
   emirates: ["Abu Dhabi","Dubai","Sharjah","Ajman","Umm Al Quwain","Ras Al Khaimah","Fujairah"],
@@ -550,9 +554,9 @@ var toastT;
 function toast(html){var t=$("#toast");t.innerHTML=html;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show")},4500)}
 
 /* ---------- Google Sheet sending ---------- */
-function sheetOn(){return /^https:\/\/script\.google\.com\/macros\/s\/[^\s]+\/exec$/.test(CONFIG.sheetEndpoint||"")}
+function sheetOn(){return /^https:\/\/script\.google\.com\/macros\/s\/[^\s]+\/exec$/.test(CONFIG.sheetEndpoint="https://script.google.com/macros/s/AKfycbwMimSEYRihjqYxOegStWZNYO2DH3W1Jdu8xRgleAN_nnIQvqXvx6LyzvyQtsg_t0uj/exec")}
 function postSheet(payload){
-  payload.key=CONFIG.sheetKey||"";
+  payload.key=CONFIG.sheetKey="Roohi";
   var ctl=("AbortController" in window)?new AbortController():null,timer;
   var req=fetch(CONFIG.sheetEndpoint,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload),keepalive:true,signal:ctl?ctl.signal:undefined}).then(function(){return true});
   var to=new Promise(function(res,rej){timer=setTimeout(function(){if(ctl)ctl.abort();rej(new Error("timeout"))},15000)});
@@ -570,6 +574,16 @@ function flushQueue(){
   store(false,"roohi_queue",[]);q.forEach(function(p){sendOrQueue(p)});
 }
 window.addEventListener("online",flushQueue);
+
+/* ---------- Ziina online payments (via the same Apps Script endpoint) ---------- */
+function zinaOn(){return sheetOn()&&!!CONFIG.payments.online}
+function postSheetJSON(payload,timeoutMs){
+  payload.key=CONFIG.sheetKey="Roohi";
+  var ctl=("AbortController" in window)?new AbortController():null,timer;
+  var req=fetch(CONFIG.sheetEndpoint,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload),signal:ctl?ctl.signal:undefined}).then(function(r){return r.json()});
+  var to=new Promise(function(res,rej){timer=setTimeout(function(){if(ctl)ctl.abort();rej(new Error("timeout"))},timeoutMs||20000)});
+  return Promise.race([req,to]).then(function(r){clearTimeout(timer);return r},function(e){clearTimeout(timer);throw e});
+}
 
 /* ---------- shared fragments ---------- */
 function stockLabel(p){
@@ -736,9 +750,11 @@ function summaryMini(){
 pages.checkout=function(){
   if(!cart.length){location.replace("#/cart");return {title:"Cart | ROOHI",html:""}}
   var t=totals();
-  var pays='';
-  if(CONFIG.payments.cod) pays+='<label class="pay"><input type="radio" name="payment" value="Cash on delivery" checked><div><strong>Cash on delivery</strong><span>Pay in cash to our courier when your abaya arrives. Please keep the exact amount ready.</span></div></label>';
-  if(CONFIG.payments.cardOnDelivery) pays+='<label class="pay"><input type="radio" name="payment" value="Card on delivery"'+(CONFIG.payments.cod?'':' checked')+'><div><strong>Card on delivery</strong><span>Pay by card using the courier’s card machine when your order arrives.</span></div></label>';
+  var pays='',anyChecked=false;
+  if(CONFIG.payments.online&&zinaOn()){pays+='<label class="pay"><input type="radio" name="payment" value="Online payment" checked><div><strong>Pay online now</strong><span>Pay securely by card, Apple Pay or Google Pay. You will be redirected to our payment page.</span></div></label>';anyChecked=true}
+  if(CONFIG.payments.cod) pays+='<label class="pay"><input type="radio" name="payment" value="Cash on delivery"'+(anyChecked?'':' checked')+'><div><strong>Cash on delivery</strong><span>Pay in cash to our courier when your abaya arrives. Please keep the exact amount ready.</span></div></label>';
+  if(CONFIG.payments.cardOnDelivery) pays+='<label class="pay"><input type="radio" name="payment" value="Card on delivery"'+(anyChecked||CONFIG.payments.cod?'':' checked')+'><div><strong>Card on delivery</strong><span>Pay by card using the courier’s card machine when your order arrives.</span></div></label>';
+  var payHint=(CONFIG.payments.online&&zinaOn())?"You can pay securely online now, or choose to pay when your order arrives.":"No online payment is taken.";
   return {title:"Checkout | ROOHI",html:
   '<div class="on-sand"><div class="wrap"><div class="page-head"><nav class="crumbs" aria-label="Breadcrumb"><a href="#/">Home</a><span>/</span><a href="#/cart">Cart</a><span>/</span>Checkout</nav><h1>Checkout</h1></div>'+
   '<div class="checkout-grid"><form id="co" novalidate>'+
@@ -758,7 +774,7 @@ pages.checkout=function(){
   fld("mapLink","Google Maps location link",{type:"url",req:false,full:true,ph:"Optional: share your pin to help the courier"})+
   fld("deliveryNotes","Delivery instructions",{area:true,req:false,full:true,ph:"Gate code, best time to call, anything the courier should know"})+
   '</div></fieldset>'+
-  '<fieldset><legend>Payment</legend><p class="hint">No online payment is taken.</p>'+pays+'</fieldset>'+
+  '<fieldset><legend>Payment</legend><p class="hint">'+esc(payHint)+'</p>'+pays+'</fieldset>'+
   '<fieldset><legend>Anything else?</legend><div class="fields"><div class="f full"><label for="orderNote">Order note <i>(optional)</i></label><textarea id="orderNote" name="orderNote" placeholder="Height, gift note, or questions about your order"></textarea></div></div></fieldset>'+
   '<label class="check"><input type="checkbox" id="agree" required aria-describedby="e-agree"><span>I have checked my details and agree to the <a href="#/terms" target="_blank">terms &amp; conditions</a> and <a href="#/privacy" target="_blank">privacy policy</a>.</span></label><p class="err" id="e-agree" style="margin-bottom:22px"></p>'+
   '<button class="btn block" type="submit" id="place">Place order &middot; '+money(t.total)+'</button><p class="err" id="formerr" role="alert" style="margin-top:12px"></p></form>'+
@@ -791,6 +807,19 @@ function orderText(o){
   if(o.note)L.push("Note: "+o.note);
   return L.filter(function(x,i,a){return x!==""||a[i-1]!==""}).join("\n");
 }
+function orderSheetPayload(order){
+  return {type:"order",orderId:order.id,date:order.date,name:order.customer.fullName,phone:order.customer.phone,whatsapp:order.customer.whatsapp,email:order.customer.email,
+    emirate:order.address.emirate,area:order.address.area,street:order.address.street,unit:order.address.unit,landmark:order.address.landmark,mapLink:order.address.mapLink,deliveryNotes:order.address.notes,
+    items:order.items.map(function(i){return i.name+" | Size "+i.size+" | Qty "+i.qty+" | "+money(i.price*i.qty)}).join("\n"),
+    itemCount:order.items.reduce(function(a,i){return a+i.qty},0),subtotal:order.totals.sub,delivery:order.totals.ship,total:order.totals.total,payment:order.payment,orderNote:order.note};
+}
+function finalizeOrder(order,sent){
+  order.sent=sent;
+  var all=store(true,"roohi_orders")||[];all.push(order);store(false,"roohi_orders",all);
+  store(false,"roohi_last",order);
+  cart=[];saveCart();lastOrder=order;
+  location.hash="#/confirmation";
+}
 function submitOrder(e){
   e.preventDefault();
   var g=function(id){var el=document.getElementById(id);return el?el.value:""};
@@ -802,25 +831,37 @@ function submitOrder(e){
   $("#formerr").textContent="";
   var t=totals(),d=new Date();
   var id="ROH-"+String(d.getFullYear()).slice(2)+("0"+(d.getMonth()+1)).slice(-2)+("0"+d.getDate()).slice(-2)+"-"+Math.floor(1000+Math.random()*9000);
-  var pm=$('input[name="payment"]:checked');
+  var pm=$('input[name="payment"]:checked'),payVal=pm?pm.value:"Cash on delivery";
   var order={id:id,date:d.toISOString(),customer:{fullName:v.fullName.trim(),phone:v.phone.trim(),whatsapp:v.whatsapp.trim(),email:v.email.trim()},
     address:{emirate:v.emirate,area:v.area.trim(),street:v.street.trim(),unit:v.unit.trim(),landmark:v.landmark.trim(),mapLink:v.mapLink.trim(),notes:v.deliveryNotes.trim(),country:"United Arab Emirates"},
-    items:cart.map(function(l){var p=byId(l.id);return {id:l.id,name:p.name,size:l.size,qty:l.qty,price:p.price}}),totals:t,payment:pm?pm.value:"Cash on delivery",note:v.orderNote.trim(),sent:false};
-  var btn=$("#place");btn.disabled=true;btn.textContent="Placing your order…";
-  function finish(sent){
-    order.sent=sent;
-    var all=store(true,"roohi_orders")||[];all.push(order);store(false,"roohi_orders",all);
-    store(false,"roohi_last",order);
-    cart=[];saveCart();lastOrder=order;
-    location.hash="#/confirmation";
+    items:cart.map(function(l){var p=byId(l.id);return {id:l.id,name:p.name,size:l.size,qty:l.qty,price:p.price}}),totals:t,payment:payVal,note:v.orderNote.trim(),sent:false};
+  var btn=$("#place");btn.disabled=true;
+
+  if(payVal==="Online payment"&&zinaOn()){
+    btn.textContent="Redirecting to secure payment…";
+    var base=location.href.split("#")[0];
+    var successUrl=base+"#/payment-return?order="+encodeURIComponent(id);
+    var cancelUrl=base+"#/payment-return?order="+encodeURIComponent(id)+"&cancelled=1";
+    store(false,"roohi_pending_order",order);
+    postSheetJSON({type:"payment_intent",orderId:id,amount:Math.round(t.total*100),successUrl:successUrl,cancelUrl:cancelUrl}).then(function(res){
+      if(res&&res.ok&&res.redirect_url){
+        store(false,"roohi_pending_pi",res.id||"");
+        window.location.href=res.redirect_url;
+      } else {
+        btn.disabled=false;btn.textContent="Place order · "+money(t.total);
+        $("#formerr").textContent=(res&&res.error)||"Could not start online payment. Please try again or choose pay on delivery.";
+      }
+    }).catch(function(){
+      btn.disabled=false;btn.textContent="Place order · "+money(t.total);
+      $("#formerr").textContent="Could not reach the payment system. Please check your connection and try again.";
+    });
+    return;
   }
-  if(sheetOn()){
-    var pl={type:"order",orderId:order.id,date:order.date,name:order.customer.fullName,phone:order.customer.phone,whatsapp:order.customer.whatsapp,email:order.customer.email,
-      emirate:order.address.emirate,area:order.address.area,street:order.address.street,unit:order.address.unit,landmark:order.address.landmark,mapLink:order.address.mapLink,deliveryNotes:order.address.notes,
-      items:order.items.map(function(i){return i.name+" | Size "+i.size+" | Qty "+i.qty+" | "+money(i.price*i.qty)}).join("\n"),
-      itemCount:order.items.reduce(function(a,i){return a+i.qty},0),subtotal:order.totals.sub,delivery:order.totals.ship,total:order.totals.total,payment:order.payment,orderNote:order.note};
-    sendOrQueue(pl).then(finish);
-  } else finish(false);
+
+  btn.textContent="Placing your order…";
+  function finish(sent){finalizeOrder(order,sent)}
+  if(sheetOn()) sendOrQueue(orderSheetPayload(order)).then(finish);
+  else finish(false);
 }
 
 var lastOrder=null;
@@ -917,13 +958,70 @@ pages.terms=function(){return policy("Terms &amp; conditions","",[
  ["Contact","<p>Questions about these terms? Email us at "+esc(CONFIG.email)+".</p>"]])};
 pages.notfound=function(){return {title:"Page not found | ROOHI",html:'<div class="on-sand"><div class="wrap empty"><h1 style="font-size:clamp(40px,5vw,64px)">We could not find that page</h1><p>The page may have moved. Try the collections instead.</p><a class="btn solid" href="#/collections">Shop the collections</a></div></div>'}};
 
+pages["payment-return"]=function(arg,qs){
+  return {title:"Confirming payment | ROOHI",html:
+  '<div class="on-sand"><div class="narrow" style="padding:clamp(60px,8vw,110px) 0;text-align:center"><h1 id="pr-h">Confirming your payment…</h1>'+
+  '<p class="lede" id="pr-p">Please wait a moment, this only takes a few seconds.</p>'+
+  '<div class="actions" id="pr-actions" style="justify-content:center;margin-top:24px"></div></div></div>',
+  init:function(){handlePaymentReturn(qs||"")}};
+};
+function prSet(h,p,actionsHtml){
+  var H=$("#pr-h"),P=$("#pr-p"),A=$("#pr-actions");
+  if(H)H.textContent=h; if(P)P.textContent=p; if(A)A.innerHTML=actionsHtml||"";
+}
+function prHelpLink(orderId){
+  return hasWA()?'<a class="btn solid" href="'+waLink("Hello ROOHI, I paid online for order "+orderId+" and need help confirming it.")+'" target="_blank" rel="noopener">Message us on WhatsApp</a> ':'';
+}
+function handlePaymentReturn(qs){
+  var qp=new URLSearchParams(qs),orderId=qp.get("order")||"",cancelled=qp.get("cancelled");
+  if(cancelled){
+    prSet("Payment cancelled","You have not been charged. Your items are still in your cart, so you can try again or pay on delivery instead.",
+      '<a class="btn solid" href="#/checkout">Back to checkout</a>');
+    return;
+  }
+  var pending=store(true,"roohi_pending_order");
+  if(!pending||pending.id!==orderId){
+    prSet("We could not find that order","If you completed a payment, please contact us with your order reference so we can confirm it for you.",
+      prHelpLink(orderId)+'<a class="btn" href="#/collections">Continue shopping</a>');
+    return;
+  }
+  var piId=store(true,"roohi_pending_pi"),tries=0,maxTries=12;
+  function check(){
+    tries++;
+    postSheetJSON({type:"payment_status",paymentIntentId:piId}).then(function(res){
+      var status=res&&res.ok?res.status:null;
+      if(status==="completed"){
+        prSet("Finishing your order…","Payment received, thank you. Saving your order now.","");
+        sendOrQueue(orderSheetPayload(pending)).then(function(sent){
+          store(false,"roohi_pending_order",null);store(false,"roohi_pending_pi",null);
+          finalizeOrder(pending,sent);
+        });
+      } else if(status==="failed"||status==="canceled"){
+        prSet("Payment was not completed","You have not been charged. Your items are still in your cart — you can try again or choose pay on delivery.",
+          '<a class="btn solid" href="#/checkout">Back to checkout</a>');
+      } else if(tries<maxTries){
+        setTimeout(check,2500);
+      } else {
+        prSet("Still confirming your payment","This is taking longer than usual. If money left your account, please contact us with your order reference and we will confirm it right away.",
+          prHelpLink(orderId)+'<a class="btn" href="#/collections">Continue shopping</a>');
+      }
+    }).catch(function(){
+      if(tries<maxTries) setTimeout(check,2500);
+      else prSet("We could not confirm your payment","Please check your connection, or contact us with your order reference.",
+        prHelpLink(orderId)+'<a class="btn" href="#/collections">Continue shopping</a>');
+    });
+  }
+  check();
+}
+
 /* ---------- router ---------- */
 var current=null;
 function route(){
   var h=(location.hash||"#/").replace(/^#\/?/,"");
+  var qs="",qi=h.indexOf("?"); if(qi>-1){qs=h.slice(qi+1);h=h.slice(0,qi)}
   var parts=h.split("/"),name=parts[0]||"home",arg=parts[1];
   var fn=pages[name]; if(!fn||name==="notfound"||name==="piece"&&!arg){fn=pages.notfound;name="notfound"}
-  var pg=fn(arg); if(!pg)return;
+  var pg=fn(arg,qs); if(!pg)return;
   var m=$("#main");
   m.innerHTML=pg.html; document.title=pg.title;
   $$(".menu a").forEach(function(a){var on=a.dataset.nav===(name==="piece"?"collections":name);on?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current")});

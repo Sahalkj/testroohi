@@ -4,10 +4,19 @@
  */
 
 // 1) Choose any secret word. It must be the same as "sheetKey" in the website's CONFIG.
-var SECRET_KEY = "change-this-secret-word";
+var SECRET_KEY = "Roohi";
 
 // 2) Optional: an email address that should be notified about every new order and enquiry. Leave "" for none.
-var NOTIFY_EMAIL = "";
+var NOTIFY_EMAIL = "roohiabayass@gmail.com";
+
+// 3) Optional: accept online payments (card / Apple Pay / Google Pay) via Ziina ("Zina").
+//    Get your secret API key from your Ziina dashboard (Developers > API keys). NEVER put this
+//    key anywhere in your website's HTML — it must only ever live here, on the server.
+var ZINA_ENABLED = true;          // set to true once ZINA_API_KEY below is filled in
+var ZINA_API_KEY = "qo5OdiwUVa4PcsIJj83uYfqCGzcBRGdpfVIBo2DbMfZLY12ahIx/7eufFTD9UGNW";             // your Ziina secret API key, e.g. "sk_live_..." or "sk_test_..."
+var ZINA_TEST_MODE = true;         // true = test payments only (no money moves). Set false to go live.
+var ZINA_BASE = "https://api-v2.ziina.com/api";
+var ZINA_MAX_FILS = 2000000;       // safety cap on any single payment request = 20,000 AED
 
 var ORDERS_SHEET = "Orders";
 var ENQUIRIES_SHEET = "Enquiries";
@@ -31,6 +40,8 @@ function doPost(e) {
     if (d.key !== SECRET_KEY) return reply("forbidden");
     if (d.type === "order") saveOrder(d);
     else if (d.type === "enquiry") saveEnquiry(d);
+    else if (d.type === "payment_intent") return json(createPaymentIntent(d));
+    else if (d.type === "payment_status") return json(getPaymentStatus(d));
     else return reply("unknown type");
     return reply("ok");
   } catch (err) {
@@ -42,6 +53,10 @@ function doPost(e) {
 
 function reply(text) {
   return ContentService.createTextOutput(text);
+}
+
+function json(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 
 function getSheet(name, headers) {
@@ -113,4 +128,75 @@ function saveEnquiry(d) {
 function notify(subject, body) {
   if (!NOTIFY_EMAIL) return;
   try { MailApp.sendEmail(NOTIFY_EMAIL, subject, body); } catch (err) {}
+}
+
+// ---- Ziina ("Zina") online payments -------------------------------------
+
+// Creates a Ziina Payment Intent and returns its redirect_url so the website
+// can send the customer to the hosted payment page.
+function createPaymentIntent(d) {
+  if (!ZINA_ENABLED || !ZINA_API_KEY) {
+    return { ok: false, error: "Online payment is not set up yet. Please choose pay on delivery." };
+  }
+  var amount = Math.round(Number(d.amount) || 0); // amount in fils, e.g. 100 AED = 10000
+  if (!amount || amount < 200) return { ok: false, error: "The amount is below the 2 AED minimum for online payment." };
+  if (amount > ZINA_MAX_FILS) return { ok: false, error: "That amount is too large for online payment. Please choose pay on delivery." };
+
+  var payload = {
+    amount: amount,
+    currency_code: "AED",
+    message: "ROOHI order " + txt(d.orderId),
+    success_url: txt(d.successUrl),
+    cancel_url: txt(d.cancelUrl),
+    test: !!ZINA_TEST_MODE,
+    transaction_source: "directApi",
+    operation_id: txt(d.orderId) // same order id on retry avoids creating duplicate charges
+  };
+
+  try {
+    var res = UrlFetchApp.fetch(ZINA_BASE + "/payment_intent", {
+      method: "post",
+      contentType: "application/json",
+      headers: { Authorization: "Bearer " + ZINA_API_KEY },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+    var code = res.getResponseCode();
+    var body = {};
+    try { body = JSON.parse(res.getContentText()); } catch (e2) {}
+    if (code >= 200 && code < 300 && body.redirect_url) {
+      return { ok: true, id: body.id, redirect_url: body.redirect_url, status: body.status };
+    }
+    var msg = (body.latest_error && body.latest_error.message) || body.message || "Could not start the payment. Please try again.";
+    return { ok: false, error: msg };
+  } catch (err) {
+    return { ok: false, error: "Could not reach the payment provider. Please try again." };
+  }
+}
+
+// Looks up the current status of a Ziina Payment Intent so the website can
+// confirm whether a payment actually completed before an order is saved.
+function getPaymentStatus(d) {
+  if (!ZINA_ENABLED || !ZINA_API_KEY) {
+    return { ok: false, error: "Online payment is not set up yet." };
+  }
+  var id = txt(d.paymentIntentId);
+  if (!id) return { ok: false, error: "Missing payment reference." };
+
+  try {
+    var res = UrlFetchApp.fetch(ZINA_BASE + "/payment_intent/" + encodeURIComponent(id), {
+      method: "get",
+      headers: { Authorization: "Bearer " + ZINA_API_KEY },
+      muteHttpExceptions: true
+    });
+    var code = res.getResponseCode();
+    var body = {};
+    try { body = JSON.parse(res.getContentText()); } catch (e2) {}
+    if (code >= 200 && code < 300) {
+      return { ok: true, id: body.id, status: body.status };
+    }
+    return { ok: false, error: body.message || "Could not check the payment status." };
+  } catch (err) {
+    return { ok: false, error: "Could not reach the payment provider. Please try again." };
+  }
 }
