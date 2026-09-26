@@ -389,7 +389,7 @@ var CONFIG = {
      Every order and contact-form enquiry is then added to your Google Sheet automatically.
      sheetKey must match SECRET_KEY in your Apps Script (any word you choose).
      This same endpoint is also used to create and check Ziina online payments. */
-  sheetEndpoint: "https://script.google.com/macros/s/AKfycby81ulLuQUnJuCLTuMOuuK_MCrNZzfC3hGabPToP5eQL_-hVOYFvXVb5C4qba8ZQcS1/exec",
+  sheetEndpoint: "https://script.google.com/macros/s/AKfycby_JIrg6vuO6ds83Zjr3VXb0aS98UfT7ze8cUqauqjr5OgnrT_ri5Nax9vcuWJxzpod/exec",
   sheetKey: "Roohi",
 
   emirates: ["Abu Dhabi","Dubai","Sharjah","Ajman","Umm Al Quwain","Ras Al Khaimah","Fujairah"],
@@ -478,7 +478,7 @@ var PRODUCTS = [
     long:"A statement abaya in a rich indigo tie-dye print, softened with ribbon ties at the sleeves and a solid blue front panel that frames the print.",
     details:["Indigo tie-dye print","Ribbon ties at the sleeves","Solid blue front panel","Relaxed, open-front shape"] },
 
-  { id:"desert-botanica", name:"Desert Botanica", price:2, stock:5,
+  { id:"desert-botanica", name:"Desert Botanica", price:95, stock:5,
     imgs:["images/khaki.jpg" , "images/3.1.avif"],
     pos:"50% 30%",
     sizes:{ S:true, M:false, L:true, XL:false, XXL:false },
@@ -554,7 +554,7 @@ var toastT;
 function toast(html){var t=$("#toast");t.innerHTML=html;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show")},4500)}
 
 /* ---------- Google Sheet sending ---------- */
-function sheetOn(){return /^https:\/\/script\.google\.com\/macros\/s\/[^\s]+\/exec$/.test(CONFIG.sheetEndpoint="https://script.google.com/macros/s/AKfycby81ulLuQUnJuCLTuMOuuK_MCrNZzfC3hGabPToP5eQL_-hVOYFvXVb5C4qba8ZQcS1/exec")}
+function sheetOn(){return /^https:\/\/script\.google\.com\/macros\/s\/[^\s]+\/exec$/.test(CONFIG.sheetEndpoint="https://script.google.com/macros/s/AKfycby_JIrg6vuO6ds83Zjr3VXb0aS98UfT7ze8cUqauqjr5OgnrT_ri5Nax9vcuWJxzpod/exec")}
 function postSheet(payload){
   payload.key=CONFIG.sheetKey="Roohi";
   var ctl=("AbortController" in window)?new AbortController():null,timer;
