@@ -64,13 +64,9 @@ main{flex:1;padding-top:calc(var(--nav-h) + env(safe-area-inset-top,0px))}
 main:focus{outline:none}
 
 /* ---------- Buttons ---------- */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;font-family:var(--sans);font-size:14px;letter-spacing:.16em;text-decoration:none;padding:17px 34px;border:1px solid var(--gold);color:var(--sand);background:transparent;cursor:pointer;transition:background .3s,color .3s,border-color .3s;text-align:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;font-family:var(--sans);font-size:14px;letter-spacing:.16em;text-decoration:none;padding:17px 34px;border:1px solid var(--gold);color:var(--text-on-ink);background:transparent;cursor:pointer;transition:background .3s,color .3s,border-color .3s;text-align:center}
 .on-sand .btn{color:var(--text-on-sand);border-color:var(--gold-deep)}
 .btn:hover{background:var(--gold);color:var(--ink);border-color:var(--gold)}
-.btn.solid{background:var(--ink);color:var(--sand);border-color:var(--ink)}
-.on-ink .btn.solid,.hero .btn.solid,.contact-cta .btn.solid{background:var(--gold);color:var(--ink);border-color:var(--gold)}
-.btn.solid:hover{background:var(--gold-deep);border-color:var(--gold-deep);color:#fff}
-.on-ink .btn.solid:hover{background:var(--gold-soft);border-color:var(--gold-soft);color:var(--ink)}
 .btn[disabled]{opacity:.5;cursor:not-allowed}
 .btn.block{width:100%}
 .link{background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:4px;color:inherit}
@@ -119,8 +115,10 @@ main:focus{outline:none}
 /* product cards */
 .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:34px 26px}
 .cards.two{grid-template-columns:repeat(2,minmax(0,1fr))}
-.card{display:block;text-decoration:none;color:inherit}
+.card{display:block;text-decoration:none;color:inherit;position:relative}
 .card .ph{position:relative;overflow:hidden;aspect-ratio:3/4;background:var(--sand-2)}
+.card.oos .ph img{opacity:.5}
+.tag-oos{position:absolute;top:14px;left:14px;z-index:2;background:#15100c;color:#ece3d3;font-size:12px;letter-spacing:.14em;padding:7px 13px}
 .card img{width:100%;height:100%;object-fit:cover;transition:transform 1.3s cubic-bezier(.2,.7,.2,1)}
 .card:hover img{transform:scale(1.04)}
 .card .quick{position:absolute;left:0;right:0;bottom:0;padding:14px;text-align:center;background:rgba(21,16,12,.88);color:#f6efe2;font-size:14px;letter-spacing:.16em;transform:translateY(100%);transition:transform .4s}
@@ -129,6 +127,8 @@ main:focus{outline:none}
 .card h3{font-size:clamp(24px,2vw,30px);line-height:1.15}
 .card .price{white-space:nowrap;font-size:16px}
 .card p{margin:6px 0 0;font-size:15px;color:var(--taupe);line-height:1.55}
+.card .stock,.pdp .stock{display:block;margin-top:8px;font-size:13.5px;letter-spacing:.06em;color:var(--gold-deep)}
+.card .stock.oos,.pdp .stock.oos{color:var(--err)}
 @media (hover:none){.card .quick{display:none}}
 
 /* detail band */
@@ -148,8 +148,16 @@ main:focus{outline:none}
 
 /* ---------- Product page ---------- */
 .pdp{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(30px,5vw,80px);align-items:start;padding-bottom:clamp(60px,8vw,110px)}
-.pdp-img{position:sticky;top:calc(var(--nav-h) + 24px);aspect-ratio:3/4;overflow:hidden;background:var(--sand-2)}
+.pdp-gallery{position:sticky;top:calc(var(--nav-h) + 24px)}
+.pdp-img{aspect-ratio:3/4;overflow:hidden;background:var(--sand-2)}
+.pdp-img.oos img{opacity:.55}
 .pdp-img img{width:100%;height:100%;object-fit:cover}
+.pdp-thumbs{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.pdp-thumb{all:unset;box-sizing:border-box;cursor:pointer;width:64px;flex:none;aspect-ratio:3/4;overflow:hidden;border:1px solid var(--line);opacity:.6;transition:opacity .2s,border-color .2s}
+.pdp-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.pdp-thumb:hover{opacity:1}
+.pdp-thumb.active{opacity:1;border-color:var(--gold)}
+.pdp-thumb:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .pdp h1{font-size:clamp(40px,4.6vw,66px);line-height:1.02}
 .pdp .price{font-size:24px;margin:14px 0 0}
 .pdp .short{margin:22px 0 0;color:var(--taupe);max-width:50ch}
@@ -162,6 +170,8 @@ main:focus{outline:none}
 .sizes input:checked + span{background:var(--ink);color:var(--sand);border-color:var(--ink)}
 .sizes input:focus-visible + span{outline:2px solid var(--gold);outline-offset:3px}
 .sizes input:hover + span{border-color:var(--gold-deep)}
+.sizes label.unavailable span{opacity:.4;cursor:not-allowed;text-decoration:line-through}
+.sizes label.unavailable input{cursor:not-allowed}
 .err{color:var(--err);font-size:14.5px;margin:8px 0 0;min-height:0}
 .qty{display:inline-flex;align-items:center;border:1px solid var(--line);background:var(--field-bg)}
 .qty button{all:unset;cursor:pointer;width:46px;height:46px;display:grid;place-items:center;font-size:22px}
@@ -246,7 +256,7 @@ form legend{font-family:var(--serif);font-size:30px;padding:0;margin-bottom:6px}
 .prose p,.prose li{color:var(--text-on-sand)}
 .prose ul{padding-left:22px}
 .prose .upd{color:var(--taupe);font-size:15px}
-.cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-bottom:60px}
+.cgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;margin-bottom:60px}
 .ccard{border:1px solid var(--line);padding:26px;background:var(--field-bg)}
 .ccard h3{font-size:26px;margin-bottom:8px}
 .ccard p{margin:0 0 6px;color:var(--taupe);font-size:15.5px;overflow-wrap:anywhere}
@@ -303,7 +313,7 @@ footer .ar{text-align:left;font-family:var(--arabic);font-size:26px;color:var(--
   .sec-head{flex-direction:column;align-items:flex-start}.sec-head p{text-align:left}
   .trust ul{grid-template-columns:1fr;gap:14px;padding:22px 0}
   .pdp{grid-template-columns:1fr}
-  .pdp-img{position:static}
+  .pdp-gallery{position:static}
   .cart-grid,.checkout-grid,.cols2{grid-template-columns:1fr}
   .summary{position:static}
   .fields{grid-template-columns:1fr}
@@ -362,16 +372,12 @@ var CONFIG = {
   /* Contact details (shown in the footer, contact page and order messages) */
   whatsapp: "",                          // digits only with country code, e.g. "971501234567". Leave "" to hide.
   phoneDisplay: "+971 00 000 0000",
-  email: "your-email@example.com",
-  instagram: "",                         // handle without @, e.g. "roohi.abayas"
-  address: "Abu Dhabi, United Arab Emirates",
-  hours: "Daily, 10:00 – 20:00",
+  email: "roohiabayass@gmail.com",
+  instagram: "roohi_abayass",            // handle without @, e.g. "roohi.abayas"
+  hours: "Daily, 8:00 AM – 10:00 PM",
 
-  /* Delivery */
-  deliveryDays: "2–4 working days",
-  shippingFee: 20,                       // set 0 for free delivery on everything
-  freeShippingOver: 500,                 // free delivery above this subtotal. Set 0 to turn off.
-  returnDays: 7,
+  /* Delivery – free on every order */
+  deliveryDays: "7–10 working days",
 
   /* Payment options shown at checkout */
   payments: { cod: true, cardOnDelivery: false },
@@ -383,34 +389,124 @@ var CONFIG = {
   sheetKey: "",
 
   emirates: ["Abu Dhabi","Dubai","Sharjah","Ajman","Umm Al Quwain","Ras Al Khaimah","Fujairah"],
-  sizes: ["52","54","56","58","60"]      // abaya length in inches
+
+  /* Every size you sell. Turn a size on/off per-piece in PRODUCTS below. */
+  sizes: ["S","M","L","XL","XXL"]
+};
+
+/* =====================================================================
+   EDIT THIS SECTION – all the on-page wording that isn't a product
+   Change any of the text on the right of the colon; leave everything
+   else (quotes, commas) exactly as it is.
+   ===================================================================== */
+var TEXT = {
+  heroSub: "PREMIUM ABAYAS",
+  heroTagline: "Dressed in quiet luxury, finished in gold.",
+
+  trust: [
+    { title:"Cash on delivery", text:"Pay when your abaya arrives" },
+    { title:"Free delivery", text:"In "+CONFIG.deliveryDays+", across the UAE" },
+    { title:"Crafted with care", text:"Premium fabrics, carefully finished" }
+  ],
+
+  detailHeading: "Effortless is the hardest thing to design.",
+  detailText: "Every ROOHI abaya is cut for movement, so quiet luxury never feels like an effort.",
+
+  orderSectionHeading: "Ordering is simple",
+  orderSectionSub: "Order online and pay in cash when it arrives."
 };
 
 /* Images (the build replaces these paths with embedded data) */
 var IMG = {
-  bag:"images/bag.jpg", sleeve:"images/sleeve.jpg",
-  mirror:"images/mirror.jpg", blue:"images/blue.jpg", khaki:"images/khaki.jpg", plum:"images/plum.jpg"
+  bag:"images/bag.jpg", sleeve:"images/sleeve.jpg"
 };
 
-/* Your products – change names, prices and descriptions here.
-   NOTE: prices below are placeholders. */
+/* =====================================================================
+   YOUR COLLECTIONS – add, remove or edit pieces here.
+   You can have up to 20 pieces in this list, each with up to 4 photos.
+   Nothing else in the code needs to change when you add one.
+
+   HOW TO ADD A NEW PIECE
+   1. Upload its photos into the "images" folder next to this file
+      (1 to 4 photos, any file names — e.g. images/my-abaya-1.jpg).
+   2. Copy one whole { ... } block below (from the { to the matching },
+      including the comma after it), paste it just above the closing
+      "];" line, and change every value inside it.
+   3. Give it a unique "id" (lowercase, no spaces — use dashes instead).
+
+   FIELD GUIDE
+   id      – unique web address for this piece, e.g. "twilight-marble"
+             becomes yoursite.com/#/piece/twilight-marble. Letters,
+             numbers and dashes only, no spaces.
+   name    – the piece's name, shown to customers.
+   price   – the number shown to customers (in CONFIG.currency).
+   stock   – how many pieces you have ready to ship right now. Set it
+             to 0 to automatically show "Sold out" everywhere on the
+             site. The number itself is also shown to customers.
+   imgs    – a list of 1 to 4 photo paths for this piece. The first
+             photo is used as its cover photo on the shop and cards;
+             all of them appear as a gallery on its own page. Extra
+             empty slots are fine to delete if you only have 1-3 photos.
+   pos     – (optional) fine-tunes which part of the COVER photo shows
+             in the square/portrait crop, e.g. "50% 30%" nudges it up.
+             Leave as "50% 50%" (centre) if unsure.
+   sizes   – set each size to true (customers can pick it) or false
+             (it shows greyed out and cannot be clicked). Sizes must
+             match the names in CONFIG.sizes above.
+   short   – one short sentence shown on shop cards and near the price.
+   long    – a longer paragraph shown under "About this abaya".
+   details – a bullet list of features, shown under the same section.
+   ===================================================================== */
 var PRODUCTS = [
-  { id:"twilight-marble", name:"Twilight Marble", price:690, img:IMG.mirror, pos:"50% 55%",
+  { id:"twilight-marble", name:"Twilight Marble", price:110, stock:6,
+    imgs:["images/mirror.jpg", "images/1.2.avif", "images/1.3.avif", "images/1.4.avif", "images/1.5.avif"],
+    pos:"50% 55%",
+    sizes:{ S:true, M:true, L:true, XL:true, XXL:false },
     short:"A watercolour print in dusk blue, violet and ivory, layered with a sheer shawl.",
     long:"A flowing open abaya painted in soft washes of dusk blue, violet and ivory. The wide sleeves and fluid drape move beautifully with every step, and the finished edges keep the line clean.",
     details:["Watercolour print in dusk blue, violet and ivory","Open-front cut with wide sleeves","Shown styled with a sheer matching shawl","Side slits for easy movement"] },
-  { id:"indigo-bloom", name:"Indigo Bloom", price:720, img:IMG.blue, pos:"50% 25%",
+
+  { id:"indigo-bloom", name:"Indigo Bloom", price:95, stock:4,
+    imgs:["images/blue.jpg", "images/2.2.avif"],
+    pos:"50% 25%",
+    sizes:{ S:true, M:true, L:true, XL:true, XXL:false },
     short:"Tie-dye indigo tones with ribbon ties at the sleeve and a solid blue front panel.",
     long:"A statement abaya in a rich indigo tie-dye print, softened with ribbon ties at the sleeves and a solid blue front panel that frames the print.",
     details:["Indigo tie-dye print","Ribbon ties at the sleeves","Solid blue front panel","Relaxed, open-front shape"] },
-  { id:"desert-botanica", name:"Desert Botanica", price:690, img:IMG.khaki, pos:"50% 30%",
+
+  { id:"desert-botanica", name:"Desert Botanica", price:95, stock:5,
+    imgs:["images/khaki.jpg" , "images/3.1.avif"],
+    pos:"50% 30%",
+    sizes:{ S:true, M:false, L:true, XL:false, XXL:false },
     short:"Sand and olive botanical print with a golden front panel and tied sleeves.",
     long:"An easy, generous abaya in warm sand with a delicate olive botanical print. A golden front panel and ribbon-tied sleeves add quiet detail.",
     details:["Sand and olive botanical print","Golden front panel","Ribbon-tied sleeves","Full, floor-length drape"] },
-  { id:"bordeaux-lace", name:"Bordeaux Lace", price:790, img:IMG.plum, pos:"50% 20%",
+
+  { id:"bordeaux-lace", name:"Bordeaux Lace", price:110, stock:7,
+    imgs:["images/plum.jpg", "images/4.22.avif", "images/4.33.avif"],
+    pos:"50% 20%",
+    sizes:{ S:true, M:true, L:true, XL:true, XXL:false },
     short:"Floral lace over deep bordeaux, with wide flared sleeves and a clean satin border.",
     long:"Deep bordeaux floral lace layered over a matching inner dress, finished with a clean satin border and wide flared sleeves. Made for evenings and occasions.",
-    details:["Floral lace overlay in deep bordeaux","Wide flared sleeves","Satin border trim","Shown with a matching inner dress"] }
+    details:["Floral lace overlay in deep bordeaux","Wide flared sleeves","Satin border trim","Shown with a matching inner dress"] },
+
+{ id:"new-piece-name", name:"New Piece Name", price:85, stock:10,
+    imgs:["images/4.1.avif", "images/4,2.avif"],
+    pos:"50% 50%",
+    sizes:{ S:true, M:true, L:false, XL:true, XXL:false },
+    short:"One short sentence shown on the shop cards.",
+    long:"A longer paragraph describing this piece, shown on its own page.",
+    details:["Feature one","Feature two","Feature three","Feature four"] },
+  /* ---- COPY FROM HERE ----------------------------------------------
+  { id:"new-piece-name", name:"New Piece Name", price:0, stock:0,
+    imgs:["images/new-piece-1.jpg", "images/new-piece-2.jpg", "images/new-piece-3.jpg", "images/new-piece-4.jpg"],
+    pos:"50% 50%",
+    sizes:{ S:true, M:true, L:true, XL:true, XXL:true },
+    short:"One short sentence shown on the shop cards.",
+    long:"A longer paragraph describing this piece, shown on its own page.",
+    details:["Feature one","Feature two","Feature three","Feature four"] },
+  ---- TO HERE, PASTE ABOVE THIS LINE, UP TO 20 PIECES IN TOTAL ---- */
+
 ];
 /* ===================================================================== */
 
@@ -423,6 +519,9 @@ var $$=function(s,r){return [].slice.call((r||document).querySelectorAll(s))};
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function money(n){return CONFIG.currency+" "+Number(n).toLocaleString("en-US")}
 function byId(id){return PRODUCTS.filter(function(p){return p.id===id})[0]}
+function inStock(p){return p&&Number(p.stock)>0}
+function pImgs(p){return (p.imgs||[]).filter(Boolean).slice(0,4)}
+function mainImg(p){return pImgs(p)[0]||""}
 var mem={};
 function store(get,key,val){
   try{ if(get) return JSON.parse(localStorage.getItem(key)); localStorage.setItem(key,JSON.stringify(val)); }
@@ -440,8 +539,7 @@ function updateBadge(){var n=cart.reduce(function(a,l){return a+l.qty},0);var b=
 function lineTotal(l){return byId(l.id).price*l.qty}
 function totals(){
   var sub=cart.reduce(function(a,l){return a+lineTotal(l)},0);
-  var ship=(!cart.length||CONFIG.shippingFee===0||(CONFIG.freeShippingOver>0&&sub>=CONFIG.freeShippingOver))?0:CONFIG.shippingFee;
-  return {sub:sub,ship:ship,total:sub+ship};
+  return {sub:sub,ship:0,total:sub};
 }
 function addToCart(id,size,qty){
   var f=cart.filter(function(l){return l.id===id&&l.size===size})[0];
@@ -452,9 +550,9 @@ var toastT;
 function toast(html){var t=$("#toast");t.innerHTML=html;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show")},4500)}
 
 /* ---------- Google Sheet sending ---------- */
-function sheetOn(){return /^https:\/\/script\.google\.com\/macros\/s\/[^\s]+\/exec$/.test(CONFIG.sheetEndpoint="https://script.google.com/macros/s/AKfycbx7NHPz-tqMGqHGI2ZHOwAQHcWdPEE95nG7Fv4y-2Fa2e8fXd_aRgL7qEM4QdSBEDxS/exec")}
+function sheetOn(){return /^https:\/\/script\.google\.com\/macros\/s\/[^\s]+\/exec$/.test(CONFIG.sheetEndpoint||"")}
 function postSheet(payload){
-  payload.key=CONFIG.sheetKey="Roohi";
+  payload.key=CONFIG.sheetKey||"";
   var ctl=("AbortController" in window)?new AbortController():null,timer;
   var req=fetch(CONFIG.sheetEndpoint,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload),keepalive:true,signal:ctl?ctl.signal:undefined}).then(function(){return true});
   var to=new Promise(function(res,rej){timer=setTimeout(function(){if(ctl)ctl.abort();rej(new Error("timeout"))},15000)});
@@ -474,9 +572,15 @@ function flushQueue(){
 window.addEventListener("online",flushQueue);
 
 /* ---------- shared fragments ---------- */
+function stockLabel(p){
+  if(!inStock(p))return '<span class="stock oos">Sold out</span>';
+  var n=Number(p.stock);
+  return '<span class="stock">'+n+(n===1?' piece':' pieces')+' in stock</span>';
+}
 function card(p){
-  return '<a class="card" href="#/piece/'+p.id+'"><div class="ph"><img src="'+p.img+'" alt="'+esc(p.name)+' abaya" loading="lazy" style="object-position:'+p.pos+'"><span class="quick">VIEW PIECE</span></div>'+
-  '<div class="meta"><h3>'+esc(p.name)+'</h3><span class="price">'+money(p.price)+'</span></div><p>'+esc(p.short)+'</p></a>';
+  var oos=!inStock(p);
+  return '<a class="card'+(oos?' oos':'')+'" href="#/piece/'+p.id+'"><div class="ph">'+(oos?'<span class="tag-oos">Sold out</span>':'')+'<img src="'+mainImg(p)+'" alt="'+esc(p.name)+' abaya" loading="lazy" style="object-position:'+(p.pos||"50% 50%")+'"><span class="quick">VIEW PIECE</span></div>'+
+  '<div class="meta"><h3>'+esc(p.name)+'</h3><span class="price">'+money(p.price)+'</span></div><p>'+esc(p.short)+'</p>'+stockLabel(p)+'</a>';
 }
 function orderSteps(){
   return '<ol class="steps">'+
@@ -486,9 +590,7 @@ function orderSteps(){
   '<li><h3>Pay on delivery</h3><p>We confirm your order, deliver in '+esc(CONFIG.deliveryDays)+', and you pay in cash when it arrives.</p></li></ol>';
 }
 function trust(){
-  return '<div class="trust"><div class="wrap"><ul><li><strong>Cash on delivery</strong><span>Pay when your abaya arrives</span></li>'+
-  '<li><strong>Delivery in '+esc(CONFIG.deliveryDays)+'</strong><span>'+(CONFIG.freeShippingOver>0?'Free above '+money(CONFIG.freeShippingOver):'Across the UAE')+'</span></li>'+
-  '<li><strong>Easy exchanges</strong><span>Within '+CONFIG.returnDays+' days of delivery</span></li></ul></div></div>';
+  return '<div class="trust"><div class="wrap"><ul>'+TEXT.trust.map(function(t){return '<li><strong>'+esc(t.title)+'</strong><span>'+esc(t.text)+'</span></li>'}).join('')+'</ul></div></div>';
 }
 function contactCTA(){
   var b='';
@@ -503,13 +605,13 @@ function renderFooter(){
   if(hasWA())c+='<li><b>WhatsApp</b><a href="'+waLink()+'" target="_blank" rel="noopener">Chat with us</a></li>';
   c+='<li><b>Email</b><a href="mailto:'+esc(CONFIG.email)+'">'+esc(CONFIG.email)+'</a></li>';
   if(hasIG())c+='<li><b>Instagram</b><a href="https://instagram.com/'+esc(CONFIG.instagram)+'" target="_blank" rel="noopener">@'+esc(CONFIG.instagram)+'</a></li>';
-  c+='<li><b>Location</b><span>'+esc(CONFIG.address)+'</span></li><li><b>Hours</b><span>'+esc(CONFIG.hours)+'</span></li>';
+  c+='<li><b>Hours</b><span>'+esc(CONFIG.hours)+'</span></li>';
   $("#footer").innerHTML='<div class="wrap"><div class="fgrid">'+
   '<div><a class="brand" href="#/"><span class="w">ROOHI</span><span class="s">PREMIUM ABAYAS</span></a><p class="ar" lang="ar" dir="rtl">عبايات روحي</p><p>Premium abayas, delivered to your door. Pay in cash when your order arrives.</p></div>'+
   '<div><h4>Shop</h4><ul><li><a href="#/collections">All collections</a></li>'+PRODUCTS.map(function(p){return '<li><a href="#/piece/'+p.id+'">'+esc(p.name)+'</a></li>'}).join('')+'<li><a href="#/cart">Your cart</a></li></ul></div>'+
-  '<div><h4>Help</h4><ul><li><a href="#/how-to-order">How to order</a></li><li><a href="#/shipping">Shipping &amp; delivery</a></li><li><a href="#/returns">Returns &amp; exchanges</a></li><li><a href="#/faq">FAQ</a></li><li><a href="#/contact">Contact us</a></li></ul></div>'+
+  '<div><h4>Help</h4><ul><li><a href="#/how-to-order">How to order</a></li><li><a href="#/shipping">Shipping &amp; delivery</a></li><li><a href="#/faq">FAQ</a></li><li><a href="#/contact">Contact us</a></li></ul></div>'+
   '<div><h4>Contact</h4><ul class="contact-list">'+c+'</ul></div></div>'+
-  '<div class="fbar"><span>&copy; '+new Date().getFullYear()+' ROOHI. All rights reserved.</span><nav aria-label="Legal"><a href="#/privacy">Privacy policy</a><a href="#/terms">Terms &amp; conditions</a><a href="#/shipping">Shipping</a><a href="#/returns">Returns</a></nav><span>Cash on delivery available</span></div></div>';
+  '<div class="fbar"><span>&copy; '+new Date().getFullYear()+' ROOHI. All rights reserved.</span><nav aria-label="Legal"><a href="#/privacy">Privacy policy</a><a href="#/terms">Terms &amp; conditions</a><a href="#/shipping">Shipping</a></nav><span>Cash on delivery available</span></div></div>';
 }
 
 /* ---------- pages ---------- */
@@ -518,50 +620,73 @@ var pages={};
 pages.home=function(){
   return {title:"ROOHI | Premium Abayas", html:
   '<section class="hero on-ink"><div class="hero-copy"><h1 class="wordmark" aria-label="ROOHI">ROOHI</h1><div class="lockup" aria-hidden="true"><i></i><b></b><i></i></div>'+
-  '<p class="hero-sub">PREMIUM ABAYAS</p><p class="hero-line">Dressed in quiet luxury, finished in gold.</p>'+
-  '<div class="hero-cta"><a class="btn solid" href="#/collections">Shop the collections</a><a class="btn" href="#/how-to-order">How to order</a></div></div>'+
+  '<p class="hero-sub">'+esc(TEXT.heroSub)+'</p><p class="hero-line">'+esc(TEXT.heroTagline)+'</p>'+
+  '<div class="hero-cta"><a class="btn solid" href="#/collections">Shop the collections</a></div></div>'+
   '<div class="hero-media"><img src="'+IMG.bag+'" width="1024" height="1536" alt="A woman in a black ROOHI abaya with gold piping holding a cream ROOHI shopping bag"></div></section>'+
   trust()+
-  '<section class="statement on-sand"><div class="wrap"><p>Abayas cut to move with you, and made to be remembered.</p><small>From soft watercolour prints to deep bordeaux lace, every ROOHI piece pairs an easy, flowing shape with careful finishing.</small></div></section>'+
-  '<section class="on-sand" style="padding-bottom:clamp(80px,10vw,140px)"><div class="wrap"><div class="sec-head"><h2>The collections</h2><p>Four pieces from the current edit.</p></div><div class="cards">'+PRODUCTS.map(card).join('')+'</div>'+
+  '<section class="on-sand" style="padding-top:clamp(70px,10vw,140px);padding-bottom:clamp(80px,10vw,140px)"><div class="wrap"><div class="sec-head"><h2>The collections</h2></div><div class="cards">'+PRODUCTS.map(card).join('')+'</div>'+
   '<p style="text-align:center;margin:60px 0 0"><a class="btn" href="#/collections">See all collections</a></p></div></section>'+
-  '<section class="detail on-ink"><img src="'+IMG.sleeve+'" width="1536" height="1024" loading="lazy" alt="Close view of a black abaya sleeve with a fine gold line, small gold beads and the ROOHI star"><div class="wrap"><h2>A fine gold line on every sleeve.</h2><p>The ROOHI star, small gold beads and a thin trim: the details that mark a piece as ours.</p></div></section>'+
-  '<section class="section on-sand"><div class="wrap"><div class="sec-head"><h2>Ordering is simple</h2><p>Order online and pay in cash when it arrives.</p></div>'+orderSteps()+'</div></section>'+
-  contactCTA()};
+  '<section class="detail on-ink"><img src="'+IMG.sleeve+'" width="1536" height="1024" loading="lazy" alt="Close view of a black abaya sleeve with a fine gold line and the ROOHI star"><div class="wrap"><h2>'+esc(TEXT.detailHeading)+'</h2><p>'+esc(TEXT.detailText)+'</p></div></section>'+
+  '<section class="section on-sand"><div class="wrap"><div class="sec-head"><h2>'+esc(TEXT.orderSectionHeading)+'</h2><p>'+esc(TEXT.orderSectionSub)+'</p></div>'+orderSteps()+'</div></section>'};
 };
 
 pages.collections=function(){
   return {title:"Collections | ROOHI", html:
   '<div class="on-sand"><div class="wrap"><div class="page-head"><nav class="crumbs" aria-label="Breadcrumb"><a href="#/">Home</a><span>/</span>Collections</nav><h1>The collections</h1><p>Premium abayas in prints, lace and quiet colour. Select a piece to see the details, choose your size and order with cash on delivery.</p></div>'+
-  '<div class="cards" style="padding-bottom:clamp(70px,9vw,130px)">'+PRODUCTS.map(card).join('')+'</div></div></div>'+trust()+contactCTA()};
+  '<div class="cards" style="padding-bottom:clamp(70px,9vw,130px)">'+PRODUCTS.map(card).join('')+'</div></div></div>'+trust()};
 };
 
+function pdpGallery(p,oos){
+  var imgs=pImgs(p); if(!imgs.length)imgs=[""];
+  var main='<div class="pdp-img'+(oos?' oos':'')+'" id="pdpMain">'+(oos?'<span class="tag-oos">Sold out</span>':'')+'<img src="'+imgs[0]+'" alt="'+esc(p.name)+' abaya" style="object-position:'+(p.pos||"50% 50%")+'"></div>';
+  if(imgs.length<2)return '<div class="pdp-gallery">'+main+'</div>';
+  var thumbs='<div class="pdp-thumbs" role="tablist" aria-label="More photos of '+esc(p.name)+'">'+imgs.map(function(src,i){
+    return '<button type="button" class="pdp-thumb'+(i===0?' active':'')+'" data-img="'+i+'" aria-label="Photo '+(i+1)+' of '+imgs.length+'"'+(i===0?' aria-current="true"':'')+'><img src="'+src+'" alt="" loading="lazy"></button>';
+  }).join('')+'</div>';
+  return '<div class="pdp-gallery">'+main+thumbs+'</div>';
+}
 pages.piece=function(id){
   var p=byId(id); if(!p) return pages.notfound();
+  var oos=!inStock(p);
   var others=PRODUCTS.filter(function(x){return x.id!==p.id}).slice(0,3);
-  var sizes=CONFIG.sizes.map(function(s){return '<label><input type="radio" name="size" value="'+s+'"><span>'+s+'</span></label>'}).join('');
-  var szTable='<table class="sz"><tr><th>Size</th><th>Abaya length</th></tr>'+CONFIG.sizes.map(function(s){return '<tr><td>'+s+'</td><td>'+s+' inches</td></tr>'}).join('')+'</table>';
+  var pSizes=p.sizes||{};
+  var sizes=CONFIG.sizes.map(function(s){
+    var on=pSizes[s]!==false;
+    return '<label class="'+(on?'':'unavailable')+'" title="'+(on?'':'Unavailable in this piece')+'"><input type="radio" name="size" value="'+s+'"'+(on?'':' disabled aria-label="'+s+', unavailable"')+'><span>'+s+'</span></label>';
+  }).join('');
   var pay=[]; if(CONFIG.payments.cod)pay.push("Cash on delivery"); if(CONFIG.payments.cardOnDelivery)pay.push("card on delivery");
+  var buyBlock;
+  if(oos){
+    var msgLink=hasWA()?waLink("Hello ROOHI, I'd like to know when "+p.name+" will be back in stock."):"#/contact";
+    buyBlock='<div class="notice" style="margin-top:32px"><strong>Currently sold out.</strong> This piece is not available right now. Message us to ask when it will be back in stock.</div>'+
+    '<div class="buy"><a class="btn block"'+(hasWA()?' target="_blank" rel="noopener"':'')+' href="'+msgLink+'">Message us about this piece</a></div>';
+  } else {
+    buyBlock='<div class="opt"><div class="opt-label"><span id="szl">Select your size</span><a href="#size-guide" data-open="size-guide" style="font-size:14px;color:var(--taupe)">Size guide</a></div><fieldset class="sizes" aria-labelledby="szl">'+sizes+'</fieldset><p class="err" id="szerr" role="alert"></p></div>'+
+    '<div class="opt"><div class="opt-label"><span>Quantity</span></div><div class="qty"><button type="button" data-q="-1" aria-label="Decrease quantity">&minus;</button><output id="qv" aria-live="polite">1</output><button type="button" data-q="1" aria-label="Increase quantity">+</button></div></div>'+
+    '<div class="buy"><button class="btn block" type="button" data-add="'+p.id+'">Add to cart</button><button class="btn block" type="button" data-buy="'+p.id+'">Buy now</button></div>'+
+    '<ul class="assure"><li>'+esc(pay.join(" or ").replace(/^./,function(c){return c.toUpperCase()}))+' available</li><li>Free delivery in '+esc(CONFIG.deliveryDays)+'</li></ul>';
+  }
   return {title:p.name+" | ROOHI", html:
   '<div class="on-sand"><div class="wrap"><div class="page-head" style="padding-bottom:26px"><nav class="crumbs" aria-label="Breadcrumb"><a href="#/">Home</a><span>/</span><a href="#/collections">Collections</a><span>/</span>'+esc(p.name)+'</nav></div>'+
-  '<div class="pdp"><div class="pdp-img"><img src="'+p.img+'" alt="'+esc(p.name)+' abaya" style="object-position:'+p.pos+'"></div>'+
-  '<div><h1>'+esc(p.name)+'</h1><p class="price">'+money(p.price)+'</p><p class="short">'+esc(p.short)+'</p>'+
-  '<div class="opt"><div class="opt-label"><span id="szl">Select your size</span><a href="#size-guide" data-open="size-guide" style="font-size:14px;color:var(--taupe)">Size guide</a></div><fieldset class="sizes" aria-labelledby="szl">'+sizes+'</fieldset><p class="err" id="szerr" role="alert"></p></div>'+
-  '<div class="opt"><div class="opt-label"><span>Quantity</span></div><div class="qty"><button type="button" data-q="-1" aria-label="Decrease quantity">&minus;</button><output id="qv" aria-live="polite">1</output><button type="button" data-q="1" aria-label="Increase quantity">+</button></div></div>'+
-  '<div class="buy"><button class="btn solid block" type="button" data-add="'+p.id+'">Add to cart</button><button class="btn block" type="button" data-buy="'+p.id+'">Buy now</button></div>'+
-  '<ul class="assure"><li>'+esc(pay.join(" or ").replace(/^./,function(c){return c.toUpperCase()}))+' available</li><li>Delivery in '+esc(CONFIG.deliveryDays)+'</li><li>Exchange within '+CONFIG.returnDays+' days of delivery</li></ul>'+
+  '<div class="pdp">'+pdpGallery(p,oos)+
+  '<div><h1>'+esc(p.name)+'</h1><p class="price">'+money(p.price)+'</p>'+stockLabel(p)+'<p class="short">'+esc(p.short)+'</p>'+
+  buyBlock+
   '<div class="accs"><details class="acc" open><summary>About this abaya</summary><div class="body"><p>'+esc(p.long)+'</p><ul>'+p.details.map(function(d){return '<li>'+esc(d)+'</li>'}).join('')+'</ul></div></details>'+
-  '<details class="acc" id="size-guide"><summary>Size guide</summary><div class="body"><p>Abaya sizes are the length in inches, measured from the top of the shoulder down to where you want the hem to sit. Choose the size closest to your measurement.</p>'+szTable+'<p>Not sure? Message us with your height and we will help you pick.</p></div></details>'+
+  '<details class="acc" id="size-guide"><summary>Size guide</summary><div class="body"><p>Our abayas are available in S, M, L, XL and XXL, following a relaxed, flowing fit typical of premium abayas. Choose the size closest to your usual clothing size.</p><p>Not sure which to pick? If you are between two sizes, we recommend sizing up for a more relaxed, flowing look. Message us if you would like help choosing.</p></div></details>'+
   '<details class="acc"><summary>Care</summary><div class="body"><p>Please follow the care label. We recommend dry cleaning for embellished, printed and lace pieces, and storing your abaya on a hanger.</p></div></details>'+
-  '<details class="acc"><summary>Delivery, payment &amp; exchanges</summary><div class="body"><p>Delivery takes '+esc(CONFIG.deliveryDays)+'. '+(CONFIG.shippingFee>0?'Delivery costs '+money(CONFIG.shippingFee)+(CONFIG.freeShippingOver>0?', and is free on orders above '+money(CONFIG.freeShippingOver):'')+'.':'Delivery is free.')+' You pay in cash to the courier when your order arrives.</p><p>Exchanges are accepted within '+CONFIG.returnDays+' days. See <a href="#/returns">Returns &amp; exchanges</a> for details.</p></div></details></div></div></div></div></div>'+
+  '<details class="acc"><summary>Delivery &amp; payment</summary><div class="body"><p>Delivery takes '+esc(CONFIG.deliveryDays)+' and is free across the UAE. You pay in cash to the courier when your order arrives.</p></div></details></div></div></div></div></div>'+
   '<section class="section on-sand" style="padding-top:0"><div class="wrap"><div class="sec-head"><h2>How to order</h2><p>Four steps, and you pay on delivery.</p></div>'+orderSteps()+'</div></section>'+
-  '<section class="section on-sand" style="padding-top:0"><div class="wrap"><div class="sec-head"><h2>You may also like</h2><p></p></div><div class="cards" style="grid-template-columns:repeat(3,minmax(0,1fr))">'+others.map(card).join('')+'</div></div></section>'+
-  contactCTA(), init:function(){
-    var qty=1,root=$(".pdp");
+  '<section class="section on-sand" style="padding-top:0"><div class="wrap"><div class="sec-head"><h2>You may also like</h2><p></p></div><div class="cards" style="grid-template-columns:repeat(3,minmax(0,1fr))">'+others.map(card).join('')+'</div></div></section>', init:function(){
+    var qty=1,root=$(".pdp"),imgs=pImgs(p);
     root.addEventListener("click",pdpClick);
     function pdpClick(e){
-      var t=e.target.closest("[data-q],[data-add],[data-buy],[data-open]"); if(!t)return;
-      if(t.dataset.q){qty=Math.max(1,Math.min(10,qty+Number(t.dataset.q)));$("#qv").textContent=qty}
+      var t=e.target.closest("[data-q],[data-add],[data-buy],[data-open],[data-img]"); if(!t)return;
+      if(t.dataset.img!=null){
+        var i=+t.dataset.img; if(!imgs[i])return;
+        $("#pdpMain img").src=imgs[i];
+        $$(".pdp-thumb",root).forEach(function(b){var on=b===t;b.classList.toggle("active",on);if(on)b.setAttribute("aria-current","true");else b.removeAttribute("aria-current")});
+      }
+      else if(t.dataset.q){qty=Math.max(1,Math.min(10,qty+Number(t.dataset.q)));$("#qv").textContent=qty}
       else if(t.dataset.open){e.preventDefault();var d=$("#size-guide");d.open=true;d.scrollIntoView({behavior:"smooth",block:"center"})}
       else{
         var sel=$('input[name="size"]:checked');
@@ -580,15 +705,14 @@ pages.cart=function(){
   if(!cart.length) return {title:"Your cart | ROOHI",html:'<div class="on-sand"><div class="wrap empty"><h1 style="font-size:clamp(40px,5vw,64px)">Your cart is empty</h1><p>Browse the collections and add a piece you love.</p><a class="btn solid" href="#/collections">Shop the collections</a></div></div>'};
   var t=totals();
   var lines=cart.map(function(l,i){var p=byId(l.id);
-    return '<div class="line"><a href="#/piece/'+p.id+'"><img src="'+p.img+'" alt="'+esc(p.name)+'" style="object-position:'+p.pos+'"></a><div><h3><a href="#/piece/'+p.id+'" style="text-decoration:none">'+esc(p.name)+'</a></h3><p class="sub">Size '+esc(l.size)+' &middot; '+money(p.price)+' each</p>'+
+    return '<div class="line"><a href="#/piece/'+p.id+'"><img src="'+mainImg(p)+'" alt="'+esc(p.name)+'" style="object-position:'+(p.pos||"50% 50%")+'"></a><div><h3><a href="#/piece/'+p.id+'" style="text-decoration:none">'+esc(p.name)+'</a></h3><p class="sub">Size '+esc(l.size)+' &middot; '+money(p.price)+' each</p>'+
     '<div class="qty"><button type="button" data-cq="'+i+'" data-d="-1" aria-label="Decrease quantity of '+esc(p.name)+'">&minus;</button><output>'+l.qty+'</output><button type="button" data-cq="'+i+'" data-d="1" aria-label="Increase quantity of '+esc(p.name)+'">+</button></div> '+
     '<button class="link rm" type="button" data-rm="'+i+'" style="margin-left:16px">Remove</button></div><div class="tot">'+money(lineTotal(l))+'</div></div>'}).join('');
-  var freeMsg=(t.ship>0&&CONFIG.freeShippingOver>0)?'Add '+money(CONFIG.freeShippingOver-t.sub)+' more for free delivery.':'';
   return {title:"Your cart | ROOHI",html:
   '<div class="on-sand"><div class="wrap"><div class="page-head"><nav class="crumbs" aria-label="Breadcrumb"><a href="#/">Home</a><span>/</span>Cart</nav><h1>Your cart</h1></div>'+
   '<div class="cart-grid"><div id="lines">'+lines+'<p style="margin-top:24px"><a href="#/collections" class="link">Continue shopping</a></p></div>'+
-  '<aside class="summary" aria-label="Order summary"><h2>Order summary</h2><div class="sum-row"><span>Subtotal</span><span>'+money(t.sub)+'</span></div><div class="sum-row"><span>Delivery</span><span>'+(t.ship?money(t.ship):'Free')+'</span></div><div class="sum-row total"><span>Total</span><strong style="font-weight:400">'+money(t.total)+'</strong></div>'+
-  '<p class="sum-note">'+(freeMsg?esc(freeMsg)+' ':'')+'Payment is cash on delivery. You will not be charged online.</p><a class="btn solid block" href="#/checkout">Proceed to checkout</a></aside></div></div></div>'};
+  '<aside class="summary" aria-label="Order summary"><h2>Order summary</h2><div class="sum-row"><span>Subtotal</span><span>'+money(t.sub)+'</span></div><div class="sum-row"><span>Delivery</span><span>Free</span></div><div class="sum-row total"><span>Total</span><strong style="font-weight:400">'+money(t.total)+'</strong></div>'+
+  '<p class="sum-note">Payment is cash on delivery. You will not be charged online.</p><a class="btn block" href="#/checkout">Proceed to checkout</a></aside></div></div></div>'};
 };
 
 function fld(id,label,o){
@@ -604,8 +728,8 @@ function fld(id,label,o){
 
 function summaryMini(){
   var t=totals();
-  return '<aside class="summary"><h2>Your order</h2>'+cart.map(function(l){var p=byId(l.id);return '<div class="mini"><img src="'+p.img+'" alt="" style="object-position:'+p.pos+'"><div>'+esc(p.name)+'<small>Size '+esc(l.size)+' &middot; Qty '+l.qty+'</small></div><span>'+money(lineTotal(l))+'</span></div>'}).join('')+
-  '<div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px"><div class="sum-row"><span>Subtotal</span><span>'+money(t.sub)+'</span></div><div class="sum-row"><span>Delivery</span><span>'+(t.ship?money(t.ship):'Free')+'</span></div><div class="sum-row total"><span>Total to pay on delivery</span><strong style="font-weight:400">'+money(t.total)+'</strong></div></div>'+
+  return '<aside class="summary"><h2>Your order</h2>'+cart.map(function(l){var p=byId(l.id);return '<div class="mini"><img src="'+mainImg(p)+'" alt="" style="object-position:'+(p.pos||"50% 50%")+'"><div>'+esc(p.name)+'<small>Size '+esc(l.size)+' &middot; Qty '+l.qty+'</small></div><span>'+money(lineTotal(l))+'</span></div>'}).join('')+
+  '<div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px"><div class="sum-row"><span>Subtotal</span><span>'+money(t.sub)+'</span></div><div class="sum-row"><span>Delivery</span><span>Free</span></div><div class="sum-row total"><span>Total to pay on delivery</span><strong style="font-weight:400">'+money(t.total)+'</strong></div></div>'+
   '<p class="sum-note"><a href="#/cart" class="link">Edit cart</a></p></aside>';
 }
 
@@ -636,8 +760,8 @@ pages.checkout=function(){
   '</div></fieldset>'+
   '<fieldset><legend>Payment</legend><p class="hint">No online payment is taken.</p>'+pays+'</fieldset>'+
   '<fieldset><legend>Anything else?</legend><div class="fields"><div class="f full"><label for="orderNote">Order note <i>(optional)</i></label><textarea id="orderNote" name="orderNote" placeholder="Height, gift note, or questions about your order"></textarea></div></div></fieldset>'+
-  '<label class="check"><input type="checkbox" id="agree" required aria-describedby="e-agree"><span>I have checked my details and agree to the <a href="#/terms" target="_blank">terms &amp; conditions</a>, <a href="#/returns" target="_blank">returns policy</a> and <a href="#/privacy" target="_blank">privacy policy</a>.</span></label><p class="err" id="e-agree" style="margin-bottom:22px"></p>'+
-  '<button class="btn solid block" type="submit" id="place">Place order &middot; '+money(t.total)+'</button><p class="err" id="formerr" role="alert" style="margin-top:12px"></p></form>'+
+  '<label class="check"><input type="checkbox" id="agree" required aria-describedby="e-agree"><span>I have checked my details and agree to the <a href="#/terms" target="_blank">terms &amp; conditions</a> and <a href="#/privacy" target="_blank">privacy policy</a>.</span></label><p class="err" id="e-agree" style="margin-bottom:22px"></p>'+
+  '<button class="btn block" type="submit" id="place">Place order &middot; '+money(t.total)+'</button><p class="err" id="formerr" role="alert" style="margin-top:12px"></p></form>'+
   summaryMini()+'</div></div></div>', init:function(){
     $("#co").addEventListener("submit",submitOrder);
     $("#co").addEventListener("input",function(e){var id=e.target.id;if(id){setErr(id,"")}});
@@ -717,7 +841,7 @@ pages.confirmation=function(){
   '<div class="on-sand"><div class="narrow done" style="padding:clamp(50px,7vw,90px) 0 clamp(70px,9vw,120px)"><h1>Thank you, '+esc(first)+'.</h1><p class="lede">We have your order and will contact you to confirm it. Keep your phone nearby, and please have the cash ready for delivery.</p><span class="orderid">'+esc(o.id)+'</span>'+
   '<div style="margin-top:30px">'+send+'</div>'+
   '<div class="box"><h2>Order details</h2><dl>'+o.items.map(function(i){return '<dt>'+esc(i.name)+'</dt><dd>Size '+esc(i.size)+' &middot; Qty '+i.qty+' &middot; '+money(i.price*i.qty)+'</dd>'}).join('')+
-  '<dt>Delivery fee</dt><dd>'+(o.totals.ship?money(o.totals.ship):'Free')+'</dd><dt>Total to pay</dt><dd><strong>'+money(o.totals.total)+'</strong> ('+esc(o.payment)+')</dd></dl></div>'+
+  '<dt>Delivery fee</dt><dd>Free</dd><dt>Total to pay</dt><dd><strong>'+money(o.totals.total)+'</strong> ('+esc(o.payment)+')</dd></dl></div>'+
   '<div class="box"><h2>Delivering to</h2><dl><dt>Name</dt><dd>'+esc(o.customer.fullName)+'</dd><dt>Mobile</dt><dd>'+esc(o.customer.phone)+'</dd><dt>Email</dt><dd>'+esc(o.customer.email)+'</dd><dt>Address</dt><dd>'+esc([o.address.street,o.address.unit,o.address.area,o.address.emirate,"United Arab Emirates"].filter(Boolean).join(", "))+'</dd>'+(o.address.landmark?'<dt>Landmark</dt><dd>'+esc(o.address.landmark)+'</dd>':'')+'</dl></div>'+
   '<h2 style="font-size:32px;margin:44px 0 6px">What happens next</h2><ul class="next"><li>We contact you by phone or WhatsApp to confirm your order and address.</li><li>We prepare and dispatch your abaya. Delivery takes '+esc(CONFIG.deliveryDays)+'.</li><li>The courier calls you on arrival. Check your piece, then pay '+money(o.totals.total)+' in cash.</li></ul>'+
   '<div class="actions no-print" style="justify-content:flex-start"><button class="btn" type="button" onclick="window.print()">Print this page</button><a class="btn" href="#/collections">Continue shopping</a></div></div></div>'};
@@ -728,10 +852,8 @@ function faqItems(){
   ["How do I place an order?","Choose a piece, select your size and add it to your cart. At checkout, enter your name, phone number and full address, then place your order. We will contact you to confirm."],
   ["How does cash on delivery work?","You do not pay online. When your order arrives, you pay the courier in cash. Please keep the exact amount ready."],
   ["How long does delivery take?","Delivery takes "+CONFIG.deliveryDays+" after your order is confirmed."],
-  ["How much is delivery?",CONFIG.shippingFee>0?"Delivery costs "+money(CONFIG.shippingFee)+(CONFIG.freeShippingOver>0?" and is free on orders above "+money(CONFIG.freeShippingOver)+".":"."):"Delivery is free."],
-  ["How do I choose my size?","Abaya sizes are the length in inches, measured from the top of the shoulder to where you want the hem to sit. Message us with your height if you would like help."],
-  ["Can I exchange my abaya?","Yes. Exchanges are accepted within "+CONFIG.returnDays+" days of delivery if the piece is unworn and in its original condition. See our returns &amp; exchanges page."],
-  ["Can I change or cancel my order?","Contact us as soon as possible after ordering. If your order has not been dispatched, we can change or cancel it."],
+  ["How much is delivery?","Delivery is free on every order, across the UAE."],
+  ["How do I choose my size?","Our abayas come in S, M, L, XL and XXL. Choose the size closest to your usual clothing size, and size up if you prefer a more relaxed, flowing fit. Message us if you would like help choosing."],
   ["What if I am not home when the courier arrives?","The courier will call you first. Please keep your phone on and make sure the number you entered is correct."]
   ];
 }
@@ -740,7 +862,6 @@ function faqHTML(){return faqItems().map(function(f,i){return '<details class="a
 pages.contact=function(){
   var cards='<div class="ccard"><h3>Call us</h3><p>'+esc(CONFIG.phoneDisplay)+'</p><p>'+esc(CONFIG.hours)+'</p></div>';
   cards+='<div class="ccard"><h3>Message us</h3>'+(hasWA()?'<p><a href="'+waLink("Hello ROOHI, I have a question.")+'" target="_blank" rel="noopener">WhatsApp</a></p>':'')+'<p><a href="mailto:'+esc(CONFIG.email)+'">'+esc(CONFIG.email)+'</a></p>'+(hasIG()?'<p><a href="https://instagram.com/'+esc(CONFIG.instagram)+'" target="_blank" rel="noopener">Instagram @'+esc(CONFIG.instagram)+'</a></p>':'')+'</div>';
-  cards+='<div class="ccard"><h3>Find us</h3><p>'+esc(CONFIG.address)+'</p></div>';
   return {title:"Contact | ROOHI",html:
   '<div class="on-sand"><div class="wrap"><div class="page-head"><nav class="crumbs" aria-label="Breadcrumb"><a href="#/">Home</a><span>/</span>Contact</nav><h1>Contact us</h1><p>Questions about a piece, sizing, or an order? We are happy to help.</p></div>'+
   '<div class="cgrid">'+cards+'</div>'+
@@ -765,7 +886,7 @@ pages.contact=function(){
   }};
 };
 
-pages.faq=function(){return {title:"FAQ | ROOHI",html:'<div class="on-sand"><div class="narrow" style="padding-bottom:clamp(70px,9vw,120px)"><div class="page-head" style="padding-left:0"><nav class="crumbs" aria-label="Breadcrumb"><a href="#/">Home</a><span>/</span>FAQ</nav><h1>Frequently asked questions</h1></div>'+faqHTML()+'<p style="margin-top:34px"><a class="btn" href="#/contact">Still need help? Contact us</a></p></div></div>'}};
+pages.faq=function(){return {title:"FAQ | ROOHI",html:'<div class="on-sand"><div class="narrow" style="padding-bottom:clamp(70px,9vw,120px)"><div class="page-head" style="padding-left:0"><nav class="crumbs" aria-label="Breadcrumb"><a href="#/">Home</a><span>/</span>FAQ</nav><h1>Frequently asked questions</h1></div>'+faqHTML()+'</div></div>'+contactCTA()}};
 
 pages["how-to-order"]=function(){return {title:"How to order | ROOHI",html:'<div class="on-sand"><div class="wrap" style="padding-bottom:clamp(70px,9vw,120px)"><div class="page-head"><nav class="crumbs" aria-label="Breadcrumb"><a href="#/">Home</a><span>/</span>How to order</nav><h1>How to order</h1><p>Order online in minutes and pay in cash when your abaya arrives.</p></div>'+orderSteps()+
   '<div class="narrow prose" style="margin:60px 0 0;margin-inline:0"><h2>Before you place your order</h2><ul><li>Check your size using the size guide on each product page.</li><li>Use the mobile number you can answer, so our team and the courier can reach you.</li><li>Write your full address: emirate, area, street, building or villa and apartment number. Add a landmark or map link if it helps.</li><li>Keep the exact cash amount ready for the courier.</li></ul></div>'+
@@ -777,16 +898,10 @@ function policy(title,updated,sections){
 pages.shipping=function(){return policy("Shipping &amp; delivery","",[
  ["Where we deliver","<p>We deliver to all emirates in the United Arab Emirates. Please enter your complete address at checkout so our courier can find you.</p>"],
  ["Delivery time","<p>Orders are delivered in "+esc(CONFIG.deliveryDays)+" after we confirm them with you. Delivery times may be longer during sales and public holidays.</p>"],
- ["Delivery fee",CONFIG.shippingFee>0?"<p>Delivery costs "+money(CONFIG.shippingFee)+(CONFIG.freeShippingOver>0?". Orders above "+money(CONFIG.freeShippingOver)+" are delivered free.":".")+"</p>":"<p>Delivery is free on all orders.</p>"],
+ ["Delivery fee","<p>Delivery is free on every order, across the United Arab Emirates.</p>"],
  ["Cash on delivery","<p>You pay the courier in cash when your order arrives. Please keep the exact amount ready. The courier will call you before arriving, so make sure your phone number is correct.</p>"],
  ["Order confirmation","<p>After you place your order, we contact you by phone or WhatsApp to confirm your details. Orders are dispatched once confirmed.</p>"],
  ["Missed deliveries","<p>If we cannot reach you or nobody is available to receive the order, we will try to arrange a second delivery. Repeated failed deliveries may lead to your order being cancelled.</p>"]])};
-pages.returns=function(){return policy("Returns &amp; exchanges","",[
- ["Exchanges","<p>We accept exchanges within "+CONFIG.returnDays+" days of delivery. The piece must be unworn, unwashed and in its original condition, with its tags and packaging.</p>"],
- ["Wrong or damaged items","<p>If you receive the wrong item or a damaged piece, contact us within 48 hours of delivery with your order number and a photo. We will arrange a replacement.</p>"],
- ["How to request an exchange","<p>Contact us on "+(hasWA()?"WhatsApp or ":"")+"email at "+esc(CONFIG.email)+" with your order number and the size or piece you would like instead. We will guide you through the next steps.</p>"],
- ["Refunds","<p>Because payment is made in cash on delivery, any approved refund will be arranged directly with you.</p>"],
- ["Items we cannot exchange","<p>Pieces that have been worn, altered or washed, and items without their original tags, cannot be exchanged.</p>"]])};
 pages.privacy=function(){return policy("Privacy policy","",[
  ["What we collect","<p>When you place an order or contact us, we collect your name, phone number, email address and delivery address, plus anything you write in your order note or message.</p>"],
  ["How we use it","<p>We use your details to confirm and deliver your order, contact you about it, and reply to your questions. We do not sell your personal information.</p>"],
@@ -798,7 +913,7 @@ pages.terms=function(){return policy("Terms &amp; conditions","",[
  ["Prices","<p>All prices are in "+esc(CONFIG.currency)+". Prices may change without notice, but the price shown at the time you place your order applies to that order.</p>"],
  ["Payment","<p>Payment is made on delivery. The total shown at checkout is the amount to pay the courier.</p>"],
  ["Product images and colours","<p>We do our best to show our abayas accurately. Colours and prints may look slightly different on different screens.</p>"],
- ["Delivery, returns and exchanges","<p>Please see our <a href=\"#/shipping\">shipping &amp; delivery</a> and <a href=\"#/returns\">returns &amp; exchanges</a> pages.</p>"],
+ ["Delivery","<p>Please see our <a href=\"#/shipping\">shipping &amp; delivery</a> page for delivery details.</p>"],
  ["Contact","<p>Questions about these terms? Email us at "+esc(CONFIG.email)+".</p>"]])};
 pages.notfound=function(){return {title:"Page not found | ROOHI",html:'<div class="on-sand"><div class="wrap empty"><h1 style="font-size:clamp(40px,5vw,64px)">We could not find that page</h1><p>The page may have moved. Try the collections instead.</p><a class="btn solid" href="#/collections">Shop the collections</a></div></div>'}};
 
